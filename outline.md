@@ -1,0 +1,73 @@
+# SCALING UP WORDPRESS ON AMAZON WEB SERVICES
+ - Follow Along
+ - What This Talk Will Cover
+ - About Me
+ - USNews Story
+ 	- Lots of work went into the College Rankings
+ 	- Got featured on Yahoo! homepage, site immediatly fell down
+ 	- Pivitol moment
+ - How do we build a website that can scale?
+ 	- What does that even mean? 
+ - What is scalability?
+ 	- Vertical vs Horizontal Scaling
+ 	- Pets vs Cattle
+ 	- Stateless Servers
+ - What is high availability?
+ 	- A website has many components to keep it up and running 
+ 	- Uptime of critical systems
+ 	- Redundancy
+ - Cloud Hosting vs Traditional Hosting
+ 	- Flexibility
+ 	- No one to call when something goes wrong
+ 	- Pricing
+ 	- Complexity
+ - What is Amazon Web Services?
+ 	- The Cloud
+ 	- EC2
+ 	- RDS
+ 	- ElastiCache
+ 	- S3
+ 	- ELB
+ - Challenges with Scaling WordPress
+ 	- The Media Library
+ - Building Your Infrastructure from Scratch
+ 	- Pick a region
+ 		- Regions? Availability Zones?  
+ 	- Start with an empty VPC 
+ 	- Add a single EC2 Server
+ 		- How do you pick which size of your instance?
+ 	- Add a database
+ 		- RDS
+ 		- Multi-AZ
+ 		- Amazon managed, automatic snapshots, backups
+ 	- Add Redis Elasticache 
+ 		- For object caching
+ 		- Buffer between the database  
+ 	- For redundancy we need another EC2 server in another availability zone
+ 	- With two servers we need a load balancer
+ 		- Terminate SSL
+ 		- Check server status and do something
+ 	- S3 for static media
+ 		- WP Offload S3 Lite https://wordpress.org/plugins/amazon-s3-and-cloudfront/
+ 	- Place CDN in front of S3
+ 		- KeyCDN is half the price of CloudFront
+ - Software
+ - EasyEngine to set-up servers
+ - s3cmd to sync files to s3
+ - Deployment Pipeline
+ 	-  GitHub
+ 	-  Circle CI
+	-  GitHub
+ 	- AWS CodePipeline
+ 	- AWS CodeDeploy
+ - WP Redis 
+ - Server Images
+ - Auto Scaling
+ - Costs
+ - Tips
+ 	- Document everything, take notes
+ 	- Consistent naming of resources
+ 	- Tagging
+ 	- Naming S3 buckets
+ 	- Don't Share VPCs, keep environments separate
+ 		 

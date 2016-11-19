@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Scaling WordPress on Amazon Web Services</title>
+
+		<meta name="description" content="Slides from my 2016 WordCamp Baltimore talk about scaling WordPress on Amazon Web Services.">
+		<meta name="author" content="Russell Heimlich">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="reveal.js/css/reveal.css">
+		<link rel="stylesheet" href="reveal.js/css/theme/sky.css" id="theme">
+		<link rel="stylesheet" href="css/overrides.css">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="reveal.js/css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="reveal.js/lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+
+			<div class="slides">
+				<section>
+					<h1>Scaling WordPress on Amazon Web Services</h1>
+				</section>
+				<section>
+					<h2>Follow Along</h2>
+					<a href="http://v.gd/wpsearch">v.gd/wpsearch</a>
+				</section>
+				<section>
+					<h2>What This Talk Will Cover</h2>
+					<ul>
+						<li class="fragment">What&rsquo;s scaling?</li>
+						<li class="fragment">Step-by-step Example</li>
+						<li class="fragment">Deployment</li>
+						<li class="fragment">Q&amp;A</li>
+					</ul>
+				</section>
+				<section>
+					<h2>About Me</h2>
+					<img src="img/russell-heimlich-on-pogo-stick.jpg" alt="Russell Heimlich on a pogo stick in a suit" style="width:38%;">
+				</section>
+				<section>
+					<h3>I&rsquo;ve been playing with WordPress since 2007</h3>
+					<a href="http://www.russellheimlich.com/blog/the-first-one/"><img src="img/russell-heimlichs-first-blog-post.png" alt="Screenshot of Russell Heimlich's first blog post" style="width:75%;"></a>
+				</section>
+				<section>
+					<h3>Lead Developer at</h3>
+					<a href="http://billypenn.com/"><img class="no-border" style="width: 100%;" src="img/billypenn-logo.svg" alt="Billy Penn"></a>
+					<a href="http://theincline.com/"><img class="no-border" style="width: 100%;" src="img/the-incline-logo.svg" alt="The Incline"></a>
+				</section>
+				<section>
+					<h3>I joined Twitter before @twitter Joined Twitter</h3>
+					<a href="https://twitter.com/kingkool68/status/560885747893669889"><img src="img/joining-twitter-before-twitter.jpg" alt="@kingkool68 joined Twitter in December 2006, @twitter joined February 2007"></a>
+				</section>
+				<section>
+					<h3>When I&rsquo;m not coding&hellip;</h3>
+					<a href="https://www.zadieheimlich.com/"><img src="img/zadie-in-a-wordpress-onesie.jpg" alt="Zadie wearing a WordPress onesie" style="width:50%;"></a>
+				</section>
+				<section>
+					<h1>A Familiar Story&hellip;</h1>
+				</section>
+				<section>
+					<a href="http://www.usnews.com/"><img src="img/usnews-logo.png"></a>
+				</section>
+				<section>
+					<img src="img/usnews-best-colleges-cover.jpg">
+				</section>
+				<section data-background-color="#562F71" data-transition="fade">
+					<img src="img/yahoo.jpg" class="no-border">
+				</section>
+				<section data-background-color="#000000" data-transition="fade">
+					<img src="img/yahoo-verizon.png">
+				</section>
+				<section>
+					<p>We lasted 15 minutes&hellip;</p>
+				</section>
+				<section data-background-image="img/waffle-falling-over-explosion.gif">
+				</section>
+				<section>
+					<h1>How can we build a website that scales?</h1>
+				</section>
+				<section>
+					<h2>What is Scaling?</h2>
+				</section>
+				<section>
+					<p>Scal&bull;a&bull;bil&bull;ity&mdash;the capability of a system, network, or process to handle a growing amount of work</p>
+					<p><em>via <a href="https://en.wikipedia.org/wiki/Scalability">Scalability on Wikipedia</a></em></p>
+				</section>
+				<section>
+					<h2>Horizontal Scaling</h2>
+					<img src="img/horiztonal-scaling.svg">
+				</section>
+				<section>
+					<h2>Vertical Scaling</h2>
+					<ul>
+						<li>Bigger Servers</li>
+						<li>Adding a CDN</li>
+						<li>Redis/Memcache</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Pets vs. Cattle</h2>
+				</section>
+				<section>
+					<img src="img/puss-in-boots.gif" height="300">
+					<h3>Pets</h3>
+					<ul>
+						<li>Cutesy Names like Brutus, Penelope, Jenny</li>
+						<li>Unique, loving, cared for</li>
+						<li>When ill, you fix them</li>
+					</ul>
+				</section>
+				<section>
+					<img src="img/cattle.jpg" height="300">
+					<h3>Cattle</h3>
+					<ul>
+						<li>Algorithmic names like ec18453ba, h65106z, 8675309</li>
+						<li>Nearly identical to other cattle</li>
+						<li>When ill, you replace them</li>
+					</ul>
+				</section>
+				<section>
+					<h1>Pets don't scale!</h1>
+				</section>
+				<section>
+					<h1>What is high availability?</h1>
+				</section>
+				<section>
+					<h3>Websites have many components</h3>
+					<img src="img/generic-server-diagram.png" style="max-height:525px;">
+				</section>
+				<section>
+					<h3>Achieving High Availability</h3>
+					<ul>
+						<li>Redundancy to reduce single points of failure</li>
+						<li>Graceful failover</li>
+						<li>Monitoring/alerts + automation</li>
+					</ul>
+				</section>
+				<section>
+					<table>
+						<thead>
+							<tr>
+								<th>Nines</th>
+								<th>Availability</th>
+								<th>Downtime per Year</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>1</td>
+								<td>90%</td>
+								<td>36.5 days</td>
+							</tr>
+							<tr>
+								<td>2</td>
+								<td>99%</td>
+								<td>3.65 days</td>
+							</tr>
+							<tr>
+								<td>3</td>
+								<td>99.9%</td>
+								<td>8.76 hours</td>
+							</tr>
+							<tr>
+								<td>4</td>
+								<td>99.99%</td>
+								<td>52.56 minutes</td>
+							</tr>
+							<tr>
+								<td>5</td>
+								<td>99.999%</td>
+								<td>5.26 minutes</td>
+							</tr>
+							<tr>
+								<td>6</td>
+								<td>99.9999%</td>
+								<td>31.5 seconds</td>
+							</tr>
+							<tr>
+								<td>7</td>
+								<td>99.99999%</td>
+								<td>3.15 seconds</td>
+							</tr>
+							<tr>
+								<td>8</td>
+								<td>99.999999%</td>
+								<td>315.569 milliseconds</td>
+							</tr>
+							<tr>
+								<td>9</td>
+								<td>99.9999999%</td>
+								<td>31.5569 milliseconds</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+				<section>
+					<h1>Planning</h1>
+				</section>
+				<section>
+					<h2>Do Your Homework!</h2>
+					<ul>
+						<li>What isn't working on your current host?</li>
+						<li>What is working?</li>
+						<li>What are the specs of your current host?</li>
+						<li>CPU and RAM usage?</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Traffic Analysis</h2>
+					<ul>
+						<li>What was your busiest hour via Google Analytics?</li>
+						<li>Figure out how many requests per second that was</li>
+						<li>What type of page was that peak? Homepage? Article?</li>
+						<li>Bandwidth reports from current host?</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Yearly Traffic Spikes</h2>
+					<img src="img/yearly-traffic-spikes.jpg">
+				</section>
+				<section>
+					<h2>Pageviews by hour</h2>
+					<img src="img/daily-pageviews.jpg">
+				</section>
+				<section style="text-align:left;">
+					<p>13,322 pageviews per hour</p>
+					<p class="fragment">÷ 60 minutes</p>
+					<p class="fragment">÷ 60 seconds</p>
+					<p class="fragment">= 3.70 pageviews per second</p>
+				</section>
+				<section>
+					<img src="img/chrome-dev-tools-filter-domain.jpg">
+				</section>
+				<section>
+					<img src="img/chrome-dev-tools-view-requests-bandwidth.jpg">
+				</section>
+				<section style="text-align:left;">
+					<p>58 requests per pageview</p>
+					<p class="fragment">x 3.70 pageviews per second</p>
+					<p class="fragment">= 214.6 requests per second</p>
+				</section>
+				<section>
+					<img src="img/amazon-web-services.png" class="no-border">
+				</section>
+				<section>
+					<h3>What is Amazon Web Services?</h3>
+					<p class="fragment">Range of cloud services charged based on usage with no upfront costs.</p>
+				</section>
+				<section>
+					<img src="img/aws-services.jpg">
+				</section>
+				<section>
+					<h2>Let's Build a Website Infrastructure from Scratch!</h2>
+				</section>
+				<section>
+					<h2>Pick a Region</h2>
+					<img src="img/aws-region-map.png">
+				</section>
+				<section>
+					<h2>Regions & Availability Zones</h2>
+					<p>Regions are separate geographic area</p>
+					<p>Regions have multiple, isolated availability zones</p>
+					<img src="img/regions-versus-availability-zones.png">
+				</section>
+				<section>
+					<h2>Add a Server</h2>
+					<img src="img/just-a-server.png">
+				</section>
+				<section>
+					<h2>Elastic Compute Cloud (EC2)</h2>
+					<p>Amazon Virtual Servers</p>
+					<p>Launch a machine to connect to and install software on</p>
+				</section>
+				<section>
+					<h2>What size server?</h2>
+					<ul>
+						<li>Stick with the T2 general purpose instances</li>
+						<li>Start small (t2.micro) and upgrade as needed</li>
+					</ul>
+					<p class="fragment">See <a href="https://www.concurrencylabs.com/blog/5-steps-for-finding-optimal-ec2-infrastructure/">5 Steps for Finding Optimal EC2 Infrastructure</a></p>
+				</section>
+				<section>
+					<h2>Add a Database</h2>
+					<img src="img/server-and-database.png">
+				</section>
+				<section>
+					<h2>Relational Database Service (RDS)</h2>
+					<p>Amazon SQL</p>
+					<p>Managed MySQL database</p>
+				</section>
+				<section>
+					<h2>Add a Redis Caching Layer</h2>
+					<img src="img/server-database-and-redis.png">
+				</section>
+				<section>
+					<h2>Elasticache</h2>
+					<p>Amazon Redis</p>
+					<p>Managed Redis/Memcached service</p>
+				</section>
+				<section>
+					<h2>Add a 2nd Server</h2>
+					<img src="img/two-servers.png">
+				</section>
+				<section>
+					<h2>Add a Load Balancer</h2>
+					<img src="img/load-balancer.png">
+				</section>
+				<section>
+					<h2>Add an S3 Bucket</h2>
+					<img src="img/adding-s3-bucket.png">
+				</section>
+				<section>
+					<h2>Simple Storage Service (S3)</h2>
+					<p>Amazon Unlimited FTP Server</p>
+					<p>Upload and serve static files from</p>
+				</section>
+				<section>
+					<h2>SSL and S3 Buckets</h2>
+					<ul>
+						<li>Bucket names should be DNS compliant</li>
+						<li>Lower-case letters, numbers, hyphens</li>
+					</ul>
+					<p class="fragment" style="color: red;">BAD: example.com</p>
+					<p class="fragment" style="color: green;">GOOD: example-com</p>
+				</section>
+				<section>
+					<h2>Autoscaling and Availability Zones</h2>
+					<img src="img/availability-zones-autoscaling-1.png">
+				</section>
+				<section>
+					<h2>Autoscaling and Availability Zones</h2>
+					<img src="img/availability-zones-autoscaling-2.png">
+				</section><section>
+					<h2>Autoscaling and Availability Zones</h2>
+					<img src="img/availability-zones-autoscaling-3.png">
+				</section>
+				<section>
+					<h2>Add a CDN</h2>
+					<img src="img/add-keycdn.png">
+				</section>
+				<section>
+					<h2>Amazon CloudFront</h2>
+					<p>Amazon CDN</p>
+					<p>KeyCDN ($0.04/GB) vs CloudFront ($0.08/GB)</p>
+				</section>
+				<section>
+					<h1>Software</h1>
+				</section>
+				<section>
+					<h2>Pick an Amazon Machine Image (AMI)</h2>
+					<a href="https://aws.amazon.com/marketplace/pp/B00JV9JBDS?qid=1479177234825&sr=0-1&ref_=srh_res_product_title"><img src="img/ubuntu-logo.png" class="no-border"></a>
+					<p>Ubuntu Server 14.04 LTS (HVM), SSD Volume Type (64-bit)</p>
+				</section>
+				<section>
+					<h2>Configuring a Server</h2>
+					<p>Use <a href="https://easyengine.io/">EasyEngine.io</a></p>
+					<pre><code>wget -qO ee rt.cx/ee && sudo bash ee</code></pre>
+<pre><code>sudo ee site create example.com  \
+	--wpsubdomain \
+	--wpredis \
+	--php7 \
+	--user=admin \
+	--pass=admin</code></pre>
+	<p class="fragment"><em>* Requires Ubuntu or Debian OS</em></p>
+				</section>
+				<section>
+					<p>EasyEngine will install the following components + dependencies</p>
+					<ul>
+						<li>nginx</li>
+						<li>PHP 7</li>
+						<li>WordPress Multisite with Subdomains</li>
+						<li>Full page caching using Redis</li>
+					</ul>
+				</section>
+				<!--section>
+					<h2>Tweaks</h2>
+					<ul>
+						<li class="fragment">Need to update location of Redis server in <code>/etc/nginx/conf.d/upstream.conf</code></li>
+						<li class="fragment">Update database credentials in <code>wp-config.php</code></li>
+						<li class="fragment">Disable WordPress auto updates and file mods
+							<pre><code>define( 'WP_AUTO_UPDATE_CORE', false );
+define( 'DISALLOW_FILE_MODS', true );</code></pre></li>
+					</ul>
+				</section-->
+				<section>
+					<h2>s3cmd</h2>
+					<ul>
+						<li><a href="http://s3tools.org/s3cmd">s3tools.org/s3cmd</a></li>
+						<li>Useful for syncing files to S3</li>
+						<li><pre><code>sudo pip install s3cmd</code></pre></li>
+					</ul>
+				</section>
+				<section>
+					<h2>WordPress Plugins</h2>
+					<ul>
+						<li><a href="https://wordpress.org/plugins/nginx-helper/">nginx Helper</a></li>
+						<li><a href="https://wordpress.org/plugins/wp-redis/">WP Redis</a></li>
+						<li><a href="https://wordpress.org/plugins/amazon-s3-and-cloudfront/">WP Offload S3 Lite</a></li>
+					</ul>
+				</section>
+				<section>
+					<h2>nginx Helper</h2>
+					<ul>
+						<li>Purges Redis cache based on WordPress events</li>
+						<li>Installed automatically by EasyEngine</li>
+					</ul>
+				</section>
+				<section>
+					<h2>WP Redis</h2>
+					<ul>
+						<li>Tells WordPress to use Redis for object caching</li>
+						<li>After installation, copy <code>object-cache.php</code> to <code>/wp-content/</code></li>
+						<li>Add Redis configuration to <code>wp-config.php</code><pre><code>$redis_server = array(
+  'host' => 'redis-xxxxxxxxxx.amazonaws.com',
+  'port' => 6379,
+);</code></pre></li>
+					</ul>
+				</section>
+				<section>
+					<h2>WP Offload S3 Lite</h2>
+					<ul>
+						<li>Syncs uploaded media to S3</li>
+						<li>Rewrites uploaded media URLs to be served by S3 or a CDN</li>
+					</ul>
+				</section>
+				<section>
+					<h1>Load Testing</h1>
+				</section>
+				<section>
+					<h2>Apache Benchmarking (ab)</h2>
+					<ul>
+						<li>Free</li>
+						<li>Downloadable tool</li>
+						<li>Run on your own computer</li>
+					</ul>
+				</section>
+				<section>
+					<h2><a href="https://loader.io">loader.io</a></h2>
+					<ul>
+						<li>Free Plan</li>
+						<li>10,000 clients / test</li>
+						<li>In the cloud</li>
+					</ul>
+				</section>
+				<section>
+					<h1>Deployment</h1>
+					<p class="fragment"><em>Because sometimes you need to change things</em></p>
+				</section>
+				<section>
+					<img src="img/deployment-diagram.png">
+				</section>
+				<section>
+					<h1>Pricing</h1>
+				</section>
+				<section>
+					<h2>~$220 per Month</h2>
+					<img src="img/aws-pricing-break-down.jpg">
+				</section>
+				<section>
+					<h2>Reserved Instances</h2>
+					<ul>
+						<li class="fragment">Billing concept</li>
+						<li class="fragment">Reduced hourly rate</li>
+						<li class="fragment">Commitment to reserve resources</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Free Tier</h2>
+					<ul>
+						<li>Discounted services for 12 months after signing up</li>
+						<li>Get a basic site up and running</li>
+					</ul>
+				</section>
+				<section>
+					<h1>Other Resources</h1>
+				</section>
+				<section>
+					<ul>
+						<li><a href="https://github.com/open-guides/og-aws">AWS OpenGuide</a></li>
+						<li><a href="https://www.expeditedssl.com/aws-in-plain-english">AWS in Plain English</a></li>
+						<li><a href="http://www.ec2instances.info/">EC2Instances.info</a></li>
+						<li><a href="http://rdsinstances.info/">RDSInstances.info</a></li>
+						<li><a href="http://calculator.s3.amazonaws.com/index.html">AWS Pricing Calculator</a></li>
+						<li><a href="https://cloudcraft.co">AWS Diagraming</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<h1>Wrapping up!</h1>
+				</section>
+				<section>
+					<ul>
+						<li>AWS offers a lot of flexability&hellip;</li>
+						<li class="fragment">&hellip;at the cost of complexity</li>
+						<li class="fragment">Maybe cheaper?</li>
+						<li class="fragment">A valuable skill to have</li>
+					</ul>
+				</section>
+				<section>
+					<img src="img/traffic-spike.jpg">
+				</section>
+				<section>
+					<h1>Thank You!</h1>
+					<p class="tweet-me"><a href="https://twitter.com/kingkool68"><img src="img/twitter-logo.svg" class="no-border" alt="Tweet me!"> @kingkool68</a></p>
+					<h2 class="fragment">Questions?</h2>
+				</section>
+			</div>
+
+		</div>
+
+		<script src="reveal.js/lib/js/head.min.js"></script>
+		<script src="reveal.js/js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme || 'sky', // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

@@ -1,0 +1,26 @@
+::selection {
+  background: #FFFACD; /* WebKit/Blink Browsers */
+}
+::-moz-selection {
+  background: #FFFACD; /* Gecko Browsers */
+}
+ol li li {
+	list-style-type: upper-alpha;
+}
+.reveal section img {
+	border: 0 none;
+}
+.reveal section img.no-border {
+	box-shadow: none;
+}
+p.tweet-me {
+	text-align: center;
+	padding-top: 1.25em;
+}
+.reveal section .tweet-me img {
+	display: block;
+	margin: 0 auto;
+}
+.reveal del {
+	text-decoration: line-through;
+}
