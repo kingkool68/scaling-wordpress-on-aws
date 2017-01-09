@@ -1,8 +1,5 @@
-Searching for a Better WordPress Search
-===================================
+# Scaling WordPress on Amazon Web Services (AWS)
 
-### [View the slides](http://kingkool68.com/searching-for-a-better-wordpress-search/) ###
+### [View the slides](http://kingkool68.com/scaling-wordpress-on-aws/) ###
 
-Presented March 5th at [WordCamp Lancaster 2016](https://2016.lancasterpa.wordcamp.org/)
-
-Presented June 4th at [WordCamp Asheville 2016](https://2016.asheville.wordcamp.org/)
+Presented November 20th at [WordCamp Baltimore 2016](https://2016.baltimore.wordcamp.org/session/scaling-up-wordpress-on-amazon-web-services/)
